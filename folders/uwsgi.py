@@ -1,5 +1,5 @@
 import cherrypy
-from folders.folders import Folders
+from folders.server import Folders
 
 def application(environ, start_response):
 	conf = {}
