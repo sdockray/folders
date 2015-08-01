@@ -1,0 +1,42 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+
+  <title>{{site_title}} - {{title}}</title>
+  <meta name="description" content="{{title}}">
+  <meta name="author" content="Sean Dockray">
+
+  <link href='http://fonts.googleapis.com/css?family=Merriweather:900,300,300italic' rel='stylesheet' type='text/css'>
+  <style type="text/css">
+  body {
+  	font-family: 'Merriweather', serif;
+  	margin: 20px 20px 30px 20px;
+  }
+  img {
+  	max-width: 100%;
+  }
+  .images ul {
+  	list-style: none;
+  	list-style-type: none;
+  }
+  </style>
+  
+  <!--[if lt IE 9]>
+  <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+</head>
+
+<body>
+<p>
+{{content}}
+</p>
+<p>
+{{files}}
+</p>
+<div class="images">
+{{images}}
+</div>
+</body>
+</html>
