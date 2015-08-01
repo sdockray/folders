@@ -153,7 +153,7 @@ def load_config():
 		global files_dir 
 		global site_title
 		config = ConfigParser.RawConfigParser({'title':site_title,'files_dir':files_dir})
-	config.read(os.path.join(os.path.dirname(os.path.abspath(__file__)), config_filename))
+		config.read(os.path.join(os.path.dirname(os.path.abspath(__file__)), config_filename))
 		files_dir = config.get('app', 'files_dir')
 		site_title = config.get('app', 'title')
 		print "Loading config, setting directory to ",files_dir
