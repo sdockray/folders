@@ -99,7 +99,22 @@ def extract_title(f, default):
 	if os.path.isfile(f) and '.md' in f:
 		try:
 			contents = open(f).read()
-			m = re.search('#{1,2}([^#.]*)#{1,2}', contents)
+			m = re.search('#{1}([^#.]*)#{1}', contents)
+			if m:
+				return m.group(1)
+		except:
+			pass
+	return default
+
+
+def extract_description(f, default):
+	''' Extracts a description from a markdown file (or directory containing an index file) '''
+	if os.path.isdir(f):
+		f = os.path.join(f, index_file)
+	if os.path.isfile(f) and '.md' in f:
+		try:
+			contents = open(f).read()
+			m = re.search('#{2}([^#.]*)#{2}', contents)
 			if m:
 				return m.group(1)
 		except:
@@ -113,7 +128,7 @@ def files_list_as_html(d, base=[]):
 	md = ''
 	for dir in sorted(dirs):
 		based = base + (dir,)
-		md = "%s+ [%s](%s)\n" % (md, extract_title(os.path.join(d, dir),dir), "/"+'/'.join(based))
+		md = "%s+ [%s](%s) %s\n" % (md, extract_title(os.path.join(d, dir),dir), "/"+'/'.join(based), extract_description(os.path.join(d, dir),dir))
 	return markdown2.markdown(md)
 
 
