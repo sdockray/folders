@@ -82,7 +82,7 @@ def try_image(path):
 		return serve_image(p)
 	elif is_download(p):
 		return serve_file(p, "application/x-download", "attachment")
-	raise
+	raise Exception("Failed to serve a file")
 
 
 def read_md_as_html(f):
