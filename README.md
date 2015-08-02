@@ -8,7 +8,7 @@ It uses CherryPy as the web server and it can be run under wsgi.
 The basic idea is that for any particular folder, a webpage can be generated that shows some text, a list of folders and files, and all the images. It is very rudimentary (for example, there are no image captions) but it is also very quick. Just add content into a folder.
 
 _Guide_
-+ You need to create folders/folders/settings.cfg and set the following:
++ You need to create folders/settings.cfg and set the following:
 ```
 [app]
 files_dir=/absolute/path/to/your/content

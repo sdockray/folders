@@ -26,7 +26,7 @@ def cache_set(path, content):
 	if not os.path.exists(os.path.dirname(cached_loc)):
 		os.makedirs(os.path.dirname(cached_loc))
 	with open(cached_loc, 'w') as f:
-		f.write(content)
+		f.write(content.encode('utf-8').strip())
 
 
 def cache_get(path):
