@@ -185,7 +185,6 @@ def load_config():
 class Folders(object):
 	@cherrypy.expose
 	def default(self, *args, **kwargs):
-		try_image(args)
 		# First check if it's an image
 		try:
 			return try_image(args)
