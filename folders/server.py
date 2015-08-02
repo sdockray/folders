@@ -128,7 +128,7 @@ def files_list_as_html(d, base=[]):
 	md = ''
 	for dir in sorted(dirs):
 		based = base + (dir,)
-		md = "%s+ [%s](%s) %s\n" % (md, extract_title(os.path.join(d, dir),dir), "/"+'/'.join(based), extract_description(os.path.join(d, dir),dir))
+		md = "%s+ [%s](%s) %s\n" % (md, extract_title(os.path.join(d, dir),dir), "/"+'/'.join(based), extract_description(os.path.join(d, dir),''))
 	return markdown2.markdown(md)
 
 
