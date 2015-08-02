@@ -56,7 +56,7 @@ def serve_image(f, try_cache=True, max_size=1024):
 				image.save(cached_loc)
 				return serve_file(cached_loc)
 			except:
-				raise
+				return serve_file(f)
 
 
 def is_image(f):
