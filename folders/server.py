@@ -3,6 +3,8 @@ import os, sys, re
 import mimetypes
 import ConfigParser
 
+import PIL
+from PIL import Image
 import markdown2
 import cherrypy
 from cherrypy.lib.static import serve_file
@@ -39,6 +41,24 @@ def cache_get(path):
 	raise
 
 
+def serve_image(f, try_cache=True, max_size=1024):
+	''' Serves an image, trying from a resized cache by default '''
+	if not try_cache:
+		return serve_file(f)
+	else:
+		cached_loc = os.path.join(files_dir, cache_dir, f.replace(files_dir+'/', ''))
+		if os.path.exists(cached_loc):
+			return serve_file(cached_loc)
+		else:
+			try:
+				image = Image.open(f)
+				image.thumbnail((max_size, max_size), PIL.Image.ANTIALIAS)
+				image.save(cached_loc)
+				return serve_file(cached_loc)
+			except:
+				raise
+
+
 def is_image(f):
 	''' Is f an image? '''
 	try:
@@ -59,7 +79,7 @@ def try_image(path):
 	''' Tries to return a static image '''
 	p = os.path.join(files_dir, *path)
 	if is_image(p):
-		return serve_file(p)
+		return serve_image(p)
 	elif is_download(p):
 		return serve_file(p, "application/x-download", "attachment")
 	raise
@@ -165,6 +185,7 @@ def load_config():
 class Folders(object):
 	@cherrypy.expose
 	def default(self, *args, **kwargs):
+		try_image(args)
 		# First check if it's an image
 		try:
 			return try_image(args)
