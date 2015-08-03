@@ -29,7 +29,7 @@
   	list-style: none;
   	list-style-type: none;
   }
-  p.small {
+  div.small {
     font-size: 0.75em;
   }
   </style>
@@ -39,8 +39,8 @@
   <![endif]-->
 </head>
 
-<body>
-<p class="small"><a href="/">&laquo; {{site_title}} home</a></p>
+<body class="{{body_classes}}">
+<div class="small">{{breadcrumb}}</div>
 <div class="container">
   <p>
   {{content}}
@@ -52,8 +52,8 @@
   {{images}}
   </div>
 </div>
-<p class="small">
-This website was generated with <a href="https://github.com/sdockray/folders">Folders</a>
-</p>
+<div class="small">
+<p>This website was generated with <a href="https://github.com/sdockray/folders">Folders</a></p>
+</div>
 </body>
 </html>

@@ -138,7 +138,7 @@ def files_list_as_html(d, base=[]):
 
 
 def list_images_as_html(d, base=[]):
-	''' Lists directories in a directory as an html list '''
+	''' Lists directories in a directory as html '''
 	imgs = [o for o in os.listdir(d) if is_image(os.path.join(d,o)) and not o.startswith('_')]
 	md = ''
 	for i in sorted(imgs):
@@ -147,7 +147,29 @@ def list_images_as_html(d, base=[]):
 	return markdown2.markdown(md)
 
 
-def merge_template(title, content, files, images):
+def every_image_as_link():
+	''' Show every image (recursively to a maximum depth?) as a link to the 1st level directory '''
+	# First grab every image 
+	images = []
+	for dirpath, dirnames, filenames in os.walk(files_dir):
+		for filename in [f for f in filenames if is_image(f) and not f.startswith('_')]:
+			images.append((os.path.join(dirpath, filename), dirpath.replace(files_dir,'')))
+	print images
+
+
+def breadcrumb_as_html(path, separator=' / '):
+	''' Spits out a ul style breadcrumb '''
+	p_so_far = []
+	breadcrumb = ['[%s](/)' % site_title]
+	for p in path:
+		p_so_far.append(p)
+		title = extract_title(os.path.join(files_dir, *p_so_far),p)
+		url = '/' + '/'.join(p_so_far)
+		breadcrumb.append('[%s](%s)'%(title, url))
+	return markdown2.markdown(separator.join(breadcrumb))
+
+
+def merge_template(title, content, files, images, body_classes=None, breadcrumb=None):
 	''' Merges 3 variables into a template - looks for a custom template in content folder '''
 	custom_template = os.path.join(files_dir, template_file)
 	if not os.path.exists(custom_template):
@@ -158,6 +180,10 @@ def merge_template(title, content, files, images):
 	html = html.replace('{{content}}', content)
 	html = html.replace('{{files}}', files)
 	html = html.replace('{{images}}', images)
+	if body_classes:
+		html = html.replace('{{body_classes}}', body_classes)
+	if breadcrumb:
+		html = html.replace('{{breadcrumb}}', breadcrumb)
 	return html
 	
 
@@ -179,8 +205,12 @@ def make_page(path):
 		md = read_md_as_html(content_loc)
 		imgs = ''
 		files = ''
+	# build body classes
+	body_classes = ' '.join([p.lower().replace(' ','-') for p in path]) or 'hohohome'
+	# add in breadcrumb
+	breadcrumb = breadcrumb_as_html(path)
 	try:
-		html = merge_template(title, md, files, imgs)
+		html = merge_template(title, md, files, imgs, body_classes=body_classes, breadcrumb=breadcrumb)
 		cache_set(cache_path, html)
 		return html
 	except:
