@@ -12,7 +12,7 @@ _Guide_
 ```
 [app]
 files_dir=/absolute/path/to/your/content
-title=Your Site Title
+site_title=Your Site Title
 ```
 + If you create an index.md file, its contents will be the text.
 + Any .md file will be parsed as Markdown.

@@ -15,8 +15,15 @@
   	margin: 20px 20px 30px 20px;
   }
   img {
-  	max-width: 1024;
+  	max-width: 1024px;
     width:100%;
+  }
+  div.container {
+    min-width: 300px;
+    max-width: 1024px;
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
   }
   .images ul {
   	list-style: none;
@@ -34,14 +41,16 @@
 
 <body>
 <p class="small"><a href="/">&laquo; {{site_title}} home</a></p>
-<p>
-{{content}}
-</p>
-<p>
-{{files}}
-</p>
-<div class="images">
-{{images}}
+<div class="container">
+  <p>
+  {{content}}
+  </p>
+  <p>
+  {{files}}
+  </p>
+  <div class="images">
+  {{images}}
+  </div>
 </div>
 <p class="small">
 This website was generated with <a href="https://github.com/sdockray/folders">Folders</a>

@@ -10,12 +10,16 @@ import cherrypy
 from cherrypy.lib.static import serve_file
 
 
-site_title = 'folders'
 config_filename = 'settings.cfg'
-files_dir = '/dir/to/content/here'
-cache_dir = '.flattened'
-index_file = 'index.md'
-template_file = '_template.html'
+
+default_settings = {
+	'site_title': 'folders',
+	'files_dir': '.',
+	'cache_dir': '.flattened',
+	'max_size': 1024,
+	'index_file': 'index.md',
+	'template_file': '_template.html',
+}
 
 
 def cache_set(path, content):
@@ -41,7 +45,7 @@ def cache_get(path):
 	raise
 
 
-def serve_image(f, try_cache=True, max_size=1024):
+def serve_image(f, try_cache=True, max_dim=None):
 	''' Serves an image, trying from a resized cache by default '''
 	if not try_cache:
 		return serve_file(f)
@@ -51,8 +55,9 @@ def serve_image(f, try_cache=True, max_size=1024):
 			return serve_file(cached_loc)
 		else:
 			try:
+				max_dim = max_dim or max_size
 				image = Image.open(f)
-				image.thumbnail((max_size, max_size), PIL.Image.ANTIALIAS)
+				image.thumbnail((max_dim, max_dim), PIL.Image.ANTIALIAS)
 				image.save(cached_loc)
 				return serve_file(cached_loc)
 			except:
@@ -182,15 +187,22 @@ def make_page(path):
 		raise
 
 
+def page_404():
+	''' A 404 page '''
+	# @todo: make this like template, where it can be overridden
+	return '404'
+
+
 def load_config():
 	''' Try and load a configuration file '''
 	try:
-		global files_dir 
-		global site_title
-		config = ConfigParser.RawConfigParser({'title':site_title,'files_dir':files_dir})
+		for s in default_settings:
+			globals()[s] = default_settings[s]
+		config = ConfigParser.RawConfigParser(default_settings)
 		config.read(os.path.join(os.path.dirname(os.path.abspath(__file__)), config_filename))
-		files_dir = config.get('app', 'files_dir')
-		site_title = config.get('app', 'title')
+		for s in default_settings:
+			globals()[s] = config.get('app', s)
+			print "Setting ",s," to ",config.get('app', s)
 		print "Loading config, setting directory to ",files_dir
 	except:
 		print "Failed to load from external config file... using defaults"
@@ -200,25 +212,26 @@ def load_config():
 class Folders(object):
 	@cherrypy.expose
 	def default(self, *args, **kwargs):
-		# First check if it's an image
+		# First check if it's an image (or downloadable file)
 		try:
 			return try_image(args)
 		except:
 			pass
+		# Try to get the markup page from cachce
 		try:
 			return cache_get(args)
 		except:
 			pass
+		# If it's not in cache, it needs to be generated - and if it can't be, then 404!
 		try:
 			return make_page(args)
 		except:
-			return '404' 
+			return page_404() 
 
 
 # Starting things up
 if __name__ == '__main__':
 	load_config()
-		
 	try:
 		app = cherrypy.tree.mount(Folders(), '/')
 		cherrypy.quickstart(app)
