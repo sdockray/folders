@@ -238,6 +238,7 @@ def page_404():
 
 def load_config():
 	''' Try and load a configuration file '''
+	import traceback
 	for s in default_settings:
 		globals()[s] = default_settings[s]
 	config_loc = os.path.join(os.path.dirname(os.path.abspath(__file__)), config_filename)
@@ -253,6 +254,7 @@ def load_config():
 			print "Setting ",s," to ",config.get('app', s)
 		print "Loading config, setting directory to ",files_dir
 	except:
+		print(traceback.format_exc())
 		print "Failed to load from external config file... using defaults"
 
 
