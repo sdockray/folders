@@ -19,6 +19,7 @@ default_settings = {
 	'max_size': 1024,
 	'index_file': 'index.md',
 	'template_file': '_template.html',
+	'use_cache': True,
 }
 
 
@@ -47,7 +48,7 @@ def cache_get(path):
 
 def serve_image(f, try_cache=True, max_dim=None):
 	''' Serves an image, trying from a resized cache by default '''
-	if not try_cache:
+	if not use_cache or not try_cache:
 		return serve_file(f)
 	else:
 		cached_loc = os.path.join(files_dir, cache_dir, f.replace(files_dir+'/', ''))
@@ -62,6 +63,14 @@ def serve_image(f, try_cache=True, max_dim=None):
 				return serve_file(cached_loc)
 			except:
 				return serve_file(f)
+
+
+def is_html(f):
+	''' Is f an html file? '''
+	try:
+		return 'text/html' in mimetypes.guess_type(f)[0]
+	except:
+		return False
 
 
 def is_image(f):
@@ -80,11 +89,13 @@ def is_download(f):
 		return False
 
 
-def try_image(path):
-	''' Tries to return a static image '''
+def try_file(path):
+	''' Tries to return an existing file - html, static image, or download '''
 	p = os.path.join(files_dir, *path)
 	if is_image(p):
 		return serve_image(p)
+	elif is_html(p):
+		return open(p)
 	elif is_download(p):
 		return serve_file(p, "application/x-download", "attachment")
 	raise Exception("Failed to serve a file")
@@ -101,12 +112,12 @@ def extract_title(f, default):
 	''' Extracts a title from a markdown file (or directory containing an index file) '''
 	if os.path.isdir(f):
 		f = os.path.join(f, index_file)
-	if os.path.isfile(f) and '.md' in f:
+	if os.path.isfile(f) and f.endswith('.md'):
 		try:
 			contents = open(f).read()
-			m = re.search('#{1}([^#.]*)#{1}', contents)
+			m = re.search('^#{1}([^#].*)$', contents, re.MULTILINE)
 			if m:
-				return m.group(1)
+				return m.group(1).strip()
 		except:
 			pass
 	return default
@@ -116,13 +127,14 @@ def extract_description(f, default):
 	''' Extracts a description from a markdown file (or directory containing an index file) '''
 	if os.path.isdir(f):
 		f = os.path.join(f, index_file)
-	if os.path.isfile(f) and '.md' in f:
+	if os.path.isfile(f) and f.endswith('.md'):
 		try:
 			contents = open(f).read()
-			m = re.search('#{2}([^#.]*)#{2}', contents)
+			m = re.search('^#{2,6}([^#].*)$', contents, re.MULTILINE)
 			if m:
-				return m.group(1)
+				return m.group(1).strip()
 		except:
+			print 'exception'
 			pass
 	return default
 
@@ -211,10 +223,11 @@ def make_page(path):
 	breadcrumb = breadcrumb_as_html(path)
 	try:
 		html = merge_template(title, md, files, imgs, body_classes=body_classes, breadcrumb=breadcrumb)
-		cache_set(cache_path, html)
+		if use_cache:
+			cache_set(cache_path, html)
 		return html
 	except:
-		raise
+		raise Exception("Failed to build page")
 
 
 def page_404():
@@ -231,7 +244,10 @@ def load_config():
 		config = ConfigParser.RawConfigParser(default_settings)
 		config.read(os.path.join(os.path.dirname(os.path.abspath(__file__)), config_filename))
 		for s in default_settings:
-			globals()[s] = config.get('app', s)
+			if s=='use_cache':
+				globals()[s] = config.getboolean('app', s)
+			else:
+				globals()[s] = config.get('app', s)
 			print "Setting ",s," to ",config.get('app', s)
 		print "Loading config, setting directory to ",files_dir
 	except:
@@ -244,14 +260,15 @@ class Folders(object):
 	def default(self, *args, **kwargs):
 		# First check if it's an image (or downloadable file)
 		try:
-			return try_image(args)
+			return try_file(args)
 		except:
 			pass
-		# Try to get the markup page from cachce
-		try:
-			return cache_get(args)
-		except:
-			pass
+		# Try to get the markup page from cache
+		if use_cache:
+			try:
+				return cache_get(args)
+			except:
+				pass
 		# If it's not in cache, it needs to be generated - and if it can't be, then 404!
 		try:
 			return make_page(args)
