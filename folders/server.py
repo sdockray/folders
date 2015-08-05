@@ -19,7 +19,7 @@ default_settings = {
 	'max_size': 1024,
 	'index_file': 'index.md',
 	'template_file': '_template.html',
-	'use_cache': True,
+	'use_cache': "True",
 }
 
 
@@ -254,7 +254,7 @@ def load_config():
 			print "Setting ",s," to ",config.get('app', s)
 		print "Loading config, setting directory to ",files_dir
 	except:
-		print(traceback.format_exc())
+		#print(traceback.format_exc())
 		print "Failed to load from external config file... using defaults"
 
 
