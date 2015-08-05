@@ -238,11 +238,13 @@ def page_404():
 
 def load_config():
 	''' Try and load a configuration file '''
+	for s in default_settings:
+		globals()[s] = default_settings[s]
+	config_loc = os.path.join(os.path.dirname(os.path.abspath(__file__)), config_filename)
+	print "Attempting to load configuration settings from ",config_loc
 	try:
-		for s in default_settings:
-			globals()[s] = default_settings[s]
 		config = ConfigParser.RawConfigParser(default_settings)
-		config.read(os.path.join(os.path.dirname(os.path.abspath(__file__)), config_filename))
+		config.read(config_loc)
 		for s in default_settings:
 			if s=='use_cache':
 				globals()[s] = config.getboolean('app', s)
