@@ -16,7 +16,7 @@ default_settings = {
 	'site_title': 'folders',
 	'files_dir': '.',
 	'cache_dir': '.flattened',
-	'max_size': 1024,
+	'max_size': 800,
 	'index_file': 'index.md',
 	'template_file': '_template.html',
 	'use_cache': "True",
@@ -96,6 +96,8 @@ def try_file(path):
 		return serve_image(p)
 	elif is_html(p):
 		return open(p)
+	elif os.path.isdir(p) and os.path.exists(os.path.join(p,'index.html')):
+		return open(os.path.join(p,'index.html'))
 	elif is_download(p):
 		return serve_file(p, "application/x-download", "attachment")
 	raise Exception("Failed to serve a file")
@@ -145,7 +147,7 @@ def files_list_as_html(d, base=[]):
 	md = ''
 	for dir in sorted(dirs):
 		based = base + (dir,)
-		md = "%s+ [%s](%s) %s\n" % (md, extract_title(os.path.join(d, dir),dir), "/"+'/'.join(based), extract_description(os.path.join(d, dir),''))
+		md = "%s+ [%s](/%s/) %s\n" % (md, extract_title(os.path.join(d, dir),dir), '/'.join(based), extract_description(os.path.join(d, dir),''))
 	return markdown2.markdown(md)
 
 
@@ -155,7 +157,7 @@ def list_images_as_html(d, base=[]):
 	md = ''
 	for i in sorted(imgs):
 		based = base + (i,)
-		md = "%s+ ![%s](%s)\n" % (md, i, "/"+'/'.join(based))
+		md = "%s+ ![%s](/%s)\n" % (md, i, '/'.join(based))
 	return markdown2.markdown(md)
 
 
