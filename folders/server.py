@@ -9,6 +9,9 @@ import markdown2
 import cherrypy
 from cherrypy.lib.static import serve_file
 
+# Deprecated in Python 3, but necessary to check for symlinks or Apple Aliases
+from Carbon import File
+
 
 config_filename = 'settings.cfg'
 
@@ -141,13 +144,19 @@ def extract_description(f, default):
 	return default
 
 
-def files_list_as_html(d, base=[]):
+def actual_path(path):
+	''' If this path is actually a symlink (or an Apple alias) it returns the actual path '''
+	return File.FSResolveAliasFile(path, True)[0].as_pathname()
+
+
+def dir_list_as_html(d):
 	''' Lists directories in a directory as an html list '''
 	dirs = [o for o in os.listdir(d) if not is_image(os.path.join(d,o)) and not o.startswith('_') and not o.startswith('.') and not o==index_file]
 	md = ''
 	for dir in sorted(dirs):
-		based = base + (dir,)
-		md = "%s+ [%s](/%s/) %s\n" % (md, extract_title(os.path.join(d, dir),dir), '/'.join(based), extract_description(os.path.join(d, dir),''))
+		target_path = actual_path(os.path.join(d, dir))
+		target_uri = target_path.replace(files_dir, '')
+		md = "%s+ [%s](%s/) %s\n" % (md, extract_title(target_path,dir), target_uri, extract_description(target_path,''))
 	return markdown2.markdown(md)
 
 
@@ -210,7 +219,7 @@ def make_page(path):
 		cache_path = path + (index_file,)
 		title = extract_title(file_loc, '/'.join(path))
 		md = read_md_as_html(file_loc)
-		files = files_list_as_html(content_loc, path)
+		files = dir_list_as_html(content_loc)
 		imgs = list_images_as_html(content_loc, path)
 	# Assume a markdown file
 	elif os.path.exists(content_loc) and os.path.isfile(content_loc):
