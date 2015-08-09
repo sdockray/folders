@@ -153,8 +153,10 @@ def actual_path(path):
 	# Unfortunately I think os.path.realpath is broken under windows, but I can't check
 	if check_apple_alias:
 		return File.FSResolveAliasFile(path, True)[0].as_pathname()
+	elif os.path.islink(path):
+		return os.readlink(path)
 	else:
-		return os.path.realpath(path)
+		return path
 
 
 def dir_list_as_html(d):
