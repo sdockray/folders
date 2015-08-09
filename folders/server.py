@@ -79,6 +79,13 @@ def is_html(f):
 	except:
 		return False
 
+def is_css(f):
+	''' Is f a css file? '''
+	try:
+		return 'text/css' in mimetypes.guess_type(f)[0]
+	except:
+		return False
+
 
 def is_image(f):
 	''' Is f an image? '''
@@ -102,6 +109,8 @@ def try_file(path):
 	if is_image(p):
 		return serve_image(p)
 	elif is_html(p):
+		return open(p)
+	elif is_css(p):
 		return open(p)
 	elif os.path.isdir(p) and os.path.exists(os.path.join(p,'index.html')):
 		return open(os.path.join(p,'index.html'))
