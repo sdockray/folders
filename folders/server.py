@@ -10,7 +10,11 @@ import cherrypy
 from cherrypy.lib.static import serve_file
 
 # Deprecated in Python 3, but necessary to check for symlinks or Apple Aliases
-from Carbon import File
+try:
+	from Carbon import File
+	check_apple_alias = True
+except:
+	check_apple_alias = False
 
 
 config_filename = 'settings.cfg'
@@ -146,7 +150,11 @@ def extract_description(f, default):
 
 def actual_path(path):
 	''' If this path is actually a symlink (or an Apple alias) it returns the actual path '''
-	return File.FSResolveAliasFile(path, True)[0].as_pathname()
+	# Unfortunately I think os.path.realpath is broken under windows, but I can't check
+	if check_apple_alias:
+		return File.FSResolveAliasFile(path, True)[0].as_pathname()
+	else:
+		return os.path.realpath(path)
 
 
 def dir_list_as_html(d):
